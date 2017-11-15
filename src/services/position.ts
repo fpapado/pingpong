@@ -1,7 +1,11 @@
-import xs from 'xstream';
+import xs, { Listener, Producer } from 'xstream';
 
-const positionProducer = {
-  start: listener => {
+interface PositionProducer extends Producer<Position> {
+  watchId: number;
+}
+
+const positionProducer: PositionProducer = {
+  start: function(listener) {
     this.watchId = navigator.geolocation.watchPosition(
       pos => listener.next(pos),
       err => listener.error(err),
@@ -12,7 +16,7 @@ const positionProducer = {
     );
   },
 
-  stop: () => {
+  stop: function() {
     navigator.geolocation.clearWatch(this.watchId);
   },
 

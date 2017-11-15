@@ -1,15 +1,6 @@
-import xs from 'xstream';
+import xs, { MemoryStream } from 'xstream';
 import { position$ } from './position';
-
-//set to true for debugging output
-let debug = false;
-
-// our current position
-let positionCurrent = {
-  lat: null,
-  lng: null,
-  hng: null
-};
+import { Either } from '@typed/either';
 
 // if we have shown the heading unavailable warning yet
 let warningHeadingShown = false;
@@ -23,48 +14,11 @@ let isNightMode = false;
 let defaultOrientation;
 
 // browser agnostic orientation
-function getBrowserOrientation() {
-  let orientation;
-  if (screen.orientation && screen.orientation.type) {
-    orientation = screen.orientation.type;
-  } else {
-    orientation =
-      screen.orientation || screen.mozOrientation || screen.msOrientation;
-  }
+function getBrowserOrientation(): OrientationType {
+  // TODO: add defs such that || screen.mozOrientation
+  let orientation = screen.orientation || screen.msOrientation;
 
-  /*
-        'portait-primary':      for (screen width < screen height, e.g. phone, phablet, small tablet)
-                                  device is in 'normal' orientation
-                                for (screen width > screen height, e.g. large tablet, laptop)
-                                  device has been turned 90deg clockwise from normal
-        'portait-secondary':    for (screen width < screen height)
-                                  device has been turned 180deg from normal
-                                for (screen width > screen height)
-                                  device has been turned 90deg anti-clockwise (or 270deg clockwise) from normal
-        'landscape-primary':    for (screen width < screen height)
-                                  device has been turned 90deg clockwise from normal
-                                for (screen width > screen height)
-                                  device is in 'normal' orientation
-        'landscape-secondary':  for (screen width < screen height)
-                                  device has been turned 90deg anti-clockwise (or 270deg clockwise) from normal
-                                for (screen width > screen height)
-                                  device has been turned 180deg from normal
-      */
-
-  return orientation;
-}
-
-// browser agnostic orientation unlock
-function browserUnlockOrientation() {
-  if (screen.orientation && screen.orientation.unlock) {
-    screen.orientation.unlock();
-  } else if (screen.unlockOrientation) {
-    screen.unlockOrientation();
-  } else if (screen.mozUnlockOrientation) {
-    screen.mozUnlockOrientation();
-  } else if (screen.msUnlockOrientation) {
-    screen.msUnlockOrientation();
-  }
+  return orientation.type;
 }
 
 // called on device orientation change
@@ -103,21 +57,15 @@ function onHeadingChange(event) {
       }
     }
 
-    positionCurrent.hng = heading + adjustment;
+    if (positionCurrent.hng === null) {
+      positionCurrent.hng = heading + adjustment;
+    }
 
+    // TODO: calculate from given location instead of true north
     let phase =
       positionCurrent.hng < 0 ? 360 + positionCurrent.hng : positionCurrent.hng;
 
     // positionHng.textContent = ((360 - phase) | 0) + '°';
-
-    // apply rotation to compass rose
-    // TODO: pass positionCurrent.hng to compass
-    // TODO: calculate from given location instead of true north
-    if (typeof rose.style.transform !== 'undefined') {
-      rose.style.transform = 'rotateZ(' + positionCurrent.hng + 'deg)';
-    } else if (typeof rose.style.webkitTransform !== 'undefined') {
-      rose.style.webkitTransform = 'rotateZ(' + positionCurrent.hng + 'deg)';
-    }
   } else {
     // device can't show heading
     showHeadingWarning();
@@ -137,9 +85,7 @@ function locationUpdate(position) {
 }
 
 function locationUpdateFail(error) {
-  positionLat.textContent = 'n/a';
-  positionLng.textContent = 'n/a';
-  console.log('location fail: ', error);
+  console.error('location fail: ', error);
 }
 
 function decimalToSexagesimal(decimal, type) {
@@ -181,16 +127,32 @@ const positionLogger = {
   }
 };
 
-export const orientation$ = position$.map(({ coords }) => {
-  // TODO: errors as appropriate
-  if (isNaN(coords.heading)) {
-    return 0;
-  } else if (coords.heading === null) {
-    return 0;
-  } else {
-    return coords.heading;
-  }
-});
+// our current position
+let positionCurrent = {
+  lat: 0,
+  lng: 0,
+  hng: 0
+};
+
+export type HeadingResult = Either<HeadingSuccess, HeadingError>;
+export type HeadingSuccess = number | 'NOT_MOVING';
+export type HeadingError = 'UNAVAILABLE';
+
+export const orientation$: MemoryStream<HeadingResult> = position$
+  .debug()
+  .map(position => {
+    let { coords } = position;
+    if (coords.heading === null) {
+      return Either.of('UNAVAILABLE' as 'UNAVAILABLE');
+    } else {
+      let res: number | 'NOT_MOVING';
+      if (isNaN(coords.heading)) {
+        return Either.left('NOT_MOVING' as 'NOT_MOVING');
+      } else {
+        return Either.left(coords.heading);
+      }
+    }
+  });
 
 // window.addEventListener('deviceorientation', onHeadingChange);
 // const hng$ = () => {};

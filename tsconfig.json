@@ -3,7 +3,7 @@
     "strict": true,
     "strictFunctionTypes": false,
     "noImplicitAny": false,
-    "target": "es2017",
+    "target": "es5",
     "module": "esnext",
     "moduleResolution": "node",
     "sourceMap": true,

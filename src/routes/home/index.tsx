@@ -3,6 +3,7 @@ import { h, Component } from 'preact';
 import { HeadingResult, orientation$ } from '../../services/orientation';
 import { Compass } from '../../components/Compass';
 import { unpack } from '@typed/either';
+import { MemoryStream } from 'xstream';
 
 interface HomeProps {}
 interface NormalState {
@@ -16,20 +17,47 @@ interface ErrorState {
 }
 type HomeState = NormalState | ErrorState;
 
+const state$: MemoryStream<HomeState> = orientation$
+  .debug()
+  .map(result => getNextState(result))
+  .startWith({ state: 'NORMAL', direction: 0 });
+
+const getNextState = (result: HeadingResult): HomeState => {
+  return unpack(
+    (value): HomeState => {
+      if (value === 'NOT_MOVING') {
+        return {
+          state: 'NORMAL',
+          direction: 0,
+          infoText:
+            'We cannot find your position without moving a bit. Please move :)'
+        };
+      } else {
+        return { state: 'NORMAL', direction: value };
+      }
+    },
+    (error): HomeState => {
+      switch (error) {
+        case 'UNAVAILABLE':
+          return {
+            state: 'ERROR' as 'ERROR',
+            errorText: 'Your device does not support detecting heading'
+          };
+      }
+    },
+    result
+  );
+};
+
 export default class Home extends Component<HomeProps, HomeState> {
-  orientationListener: Listener<HeadingResult>;
+  stateListener: Listener<HomeState>;
 
   constructor() {
     super();
 
-    this.state = {
-      state: 'NORMAL',
-      direction: 0
-    };
-
-    this.orientationListener = {
-      next: result => {
-        this.updateState(result);
+    this.stateListener = {
+      next: state => {
+        this.setState(state);
       },
       error: err => console.error(err),
       complete: () => {}
@@ -37,38 +65,11 @@ export default class Home extends Component<HomeProps, HomeState> {
   }
 
   componentDidMount() {
-    orientation$.debug().addListener(this.orientationListener);
-  }
-
-  updateState(result: HeadingResult) {
-    unpack(
-      value => {
-        if (value === 'NOT_MOVING') {
-          this.setState(prevState => ({
-            state: 'NORMAL',
-            direction: 0,
-            infoText:
-              'We cannot find your position without moving a bit. Please move :)'
-          }));
-        } else {
-          this.setState(prevState => ({ state: 'NORMAL', direction: value }));
-        }
-      },
-      error => {
-        switch (error) {
-          case 'UNAVAILABLE':
-            this.setState(prevState => ({
-              state: 'ERROR',
-              message: 'Your device does not support detecting heading'
-            }));
-        }
-      },
-      result
-    );
+    state$.addListener(this.stateListener);
   }
 
   componentWillUnmount() {
-    orientation$.removeListener(this.orientationListener);
+    state$.removeListener(this.stateListener);
   }
 
   render(props, state) {

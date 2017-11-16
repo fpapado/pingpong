@@ -55,8 +55,8 @@ export class Compass extends Component {
     return rot;
   };
 
-  render() {
-    let dir = this.normalizeAngle(this.props.direction);
+  render(props, state) {
+    let dir = this.normalizeAngle(props.direction);
     let name = this.directionName(dir);
     let rotate = `transform: rotate(-${dir}deg)`;
 
@@ -75,7 +75,7 @@ export class Compass extends Component {
           <div className={styles.compass__labels}>
             <span>{name}</span>
             <span>
-              {dir}
+              {dir.toFixed(2)}
               <sup>o</sup>
             </span>
           </div>

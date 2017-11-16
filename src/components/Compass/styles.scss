@@ -200,16 +200,16 @@ $dark-color: #2a3539;
     font-family: 'Roboto Slab', serif;
 
     &:first-child {
-      font-size: 32px;
-      line-height: 36px;
+      font-size: 20px;
+      line-height: 24px;
       font-weight: 400;
 
       text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.35);
     }
 
     &:last-child {
-      font-size: 32px;
-      line-height: 36px;
+      font-size: 20px;
+      line-height: 24px;
       font-weight: 100;
       padding-left: 6px;
       opacity: 0.9;
@@ -218,7 +218,7 @@ $dark-color: #2a3539;
   }
 
   sup {
-    line-height: 18px;
-    font-size: 24px;
+    line-height: 12px;
+    font-size: 16px;
   }
 }

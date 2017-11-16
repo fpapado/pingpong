@@ -1,5 +1,7 @@
 import xs, { MemoryStream } from 'xstream';
+import throttle from 'xstream/extra/throttle';
 import { position$ } from './position';
+import { deviceOrientation$ } from './deviceorientation';
 import { Either } from '@typed/either';
 
 // if we have shown the heading unavailable warning yet
@@ -22,14 +24,20 @@ function getBrowserOrientation(): OrientationType {
 }
 
 // called on device orientation change
-function onHeadingChange(event) {
-  let heading = event.alpha;
-
-  if (typeof event.webkitCompassHeading !== 'undefined') {
-    heading = event.webkitCompassHeading; //iOS non-standard
+// TODO: change this to a result type
+function onHeadingChange(event: DeviceOrientationEvent): number {
+  if (event.alpha === null) {
+    return 0;
   }
 
+  let heading = event.alpha;
+
+  // if (typeof event.webkitCompassHeading !== 'undefined') {
+  //   heading = event.webkitCompassHeading; //iOS non-standard
+  // }
+
   let orientation = getBrowserOrientation();
+  console.log(orientation);
 
   if (typeof heading !== 'undefined' && heading !== null) {
     // && typeof orientation !== "undefined") {
@@ -52,23 +60,20 @@ function onHeadingChange(event) {
         }
       }
 
-      if (currentOrientation[1] === 'secondary') {
+      // HACK: Necessary on my device...
+      if (currentOrientation[1] === 'primary') {
         adjustment -= 180;
       }
     }
 
-    if (positionCurrent.hng === null) {
-      positionCurrent.hng = heading + adjustment;
-    }
-
-    // TODO: calculate from given location instead of true north
-    let phase =
-      positionCurrent.hng < 0 ? 360 + positionCurrent.hng : positionCurrent.hng;
-
-    // positionHng.textContent = ((360 - phase) | 0) + '°';
+    // Finally, subtract heading from 360, to get compass heading
+    heading = 360 - (heading + adjustment);
+    return heading;
   } else {
+    // TODO: stream response
     // device can't show heading
     showHeadingWarning();
+    return 0;
   }
 }
 
@@ -77,15 +82,6 @@ function showHeadingWarning() {
     console.warn('Device cannot show heading');
     warningHeadingShown = true;
   }
-}
-
-function locationUpdate(position) {
-  positionCurrent.lat = position.coords.latitude;
-  positionCurrent.lng = position.coords.longitude;
-}
-
-function locationUpdateFail(error) {
-  console.error('location fail: ', error);
 }
 
 function decimalToSexagesimal(decimal, type) {
@@ -118,20 +114,11 @@ if (typeof screen !== 'undefined') {
 }
 
 const positionLogger = {
-  // next: locationUpdate,
-  // error: locationUpdateFail,
   next: location => console.log(location),
   error: err => console.error(err),
   complete: () => {
     console.log('Watch stream is done');
   }
-};
-
-// our current position
-let positionCurrent = {
-  lat: 0,
-  lng: 0,
-  hng: 0
 };
 
 export type HeadingResult = Either<HeadingSuccess, HeadingError>;
@@ -154,9 +141,7 @@ export const orientation$: MemoryStream<HeadingResult> = position$
     }
   });
 
-// window.addEventListener('deviceorientation', onHeadingChange);
-// const hng$ = () => {};
-
-// export const position$ = xs
-// .combine(latlng$, hng$)
-// .map(([latlng, hng]) => ({ ...latlng, hng }));
+export const heading$ = deviceOrientation$
+  .compose(throttle(100))
+  .debug()
+  .map(onHeadingChange);

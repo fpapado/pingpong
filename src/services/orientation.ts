@@ -177,7 +177,7 @@ const aimToTarget = (
 
 export const makeCustomAim$ = (target: LatLng) =>
   xs
-    .combine(position$, deviceOrientation$.compose(throttle(100)))
+    .combine(position$, deviceOrientation$.compose(throttle(16)))
     .map(([position, orientation]) =>
       aimToTarget(target, position, orientation)
     );

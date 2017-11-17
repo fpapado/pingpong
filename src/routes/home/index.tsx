@@ -1,4 +1,6 @@
-import { Listener } from 'xstream';
+import { AlertBox } from '../../components/Library';
+import xs, { Stream, Listener } from 'xstream';
+import throttle from 'xstream/extra/throttle';
 import { h, Component } from 'preact';
 import {
   HeadingResult,
@@ -43,6 +45,11 @@ const state$: MemoryStream<HomeState> = makeCustomAim$(PORTO)
   .debug()
   .map(result => stateFromAim(result))
   .startWith({ state: 'NORMAL', heading: 0 });
+
+// const state$: Stream<HomeState> = xs
+//   .periodic(100)
+//   .compose(throttle(16))
+//   .map(value => ({ state: 'NORMAL' as 'NORMAL', heading: value }));
 
 const stateFromAim = (aimResult: AimResult): HomeState => {
   return unpack(
@@ -116,7 +123,9 @@ export default class Home extends Component<HomeProps, HomeState> {
             <Compass direction={state.heading} message="Hello!" />
             {state.infoText && (
               <div class="mt4 pa3 mw6-ns center bg-light-gray">
-                <p class="center f5 lh-copy measure">{state.infoText}</p>
+                <div class="measure center">
+                  <AlertBox type="info">{state.infoText}</AlertBox>
+                </div>
               </div>
             )}
           </div>
@@ -124,8 +133,8 @@ export default class Home extends Component<HomeProps, HomeState> {
         {state.state === 'ERROR' && (
           <div>
             <Compass direction={0} />
-            <div class="mt4 pa3 mw6-ns center bg-light-gray">
-              <p class="center f5 lh-copy measure">{state.errorText}</p>
+            <div class="measure center">
+              <AlertBox type="error">{state.errorText}</AlertBox>
             </div>
           </div>
         )}

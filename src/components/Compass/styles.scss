@@ -11,7 +11,8 @@
 $accent-color: #fdca01;
 $accent-color-muted: #c4a228;
 $dark-color: #2a3539;
-$accent-red: #833f3f;
+// $accent-red: #833f3f;
+$accent-red: #ff4136;
 
 .compass {
   width: 300px;
@@ -37,6 +38,9 @@ $accent-red: #833f3f;
     content: '';
     position: absolute;
     background-color: $accent-color;
+    -webkit-transition: background-color 500ms ease-in-out, border-color 500ms ease-in-out;
+    -ms-transition: background-color 500ms ease-in-out, border-color 500ms ease-in-out;
+    transition: background-color 500ms ease-in-out, border-color 500ms ease-in-out;
   }
 
   &:before {
@@ -238,7 +242,7 @@ $accent-red: #833f3f;
 }
 
 .animatecolor {
-  -webkit-transition: background-color 500ms linear;
-  -ms-transition: background-color 500ms linear;
-  transition: background-color 500ms linear;
+  -webkit-transition: background-color 500ms ease-in-out, border-color 500ms ease-in-out;
+  -ms-transition: background-color 500ms ease-in-out, border-color 500ms ease-in-out;
+  transition: background-color 500ms ease-in-out, border-color 500ms ease-in-out;
 }

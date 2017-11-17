@@ -45,20 +45,18 @@ export class Compass extends Component {
   };
 
   render({ direction, message }, state) {
-    // let dir = this.normalizeAngle(props.direction);
-    let aligned =
-      (direction >= 0 && direction <= 10) ||
-      (direction <= 360 && direction >= 350);
+    let dir = this.normalizeAngle(direction);
+    let aligned = (dir >= 0 && dir <= 10) || (dir <= 360 && dir >= 350);
     let messageShown = aligned ? message || '' : '';
 
-    let rotate = `transform: rotate(${direction}deg)`;
+    let rotate = `transform: rotate(${dir}deg)`;
     let highlight = aligned ? 'background-color: #833f3f' : '';
 
-    let windroseCls = `${styles.compass__windrose} ${styles.animatecolor}`;
-    // ${aligned ? styles['compass__windrose--aligned'] : '' }`;
+    let windroseCls = `${styles.compass__windrose} ${styles.animatecolor}
+    ${aligned ? styles['compass__windrose--aligned'] : ''}`;
 
-    let arrowCls = `${styles.compass__arrow} ${styles.animatecolor}`;
-    // ${ aligned ? styles['compass__arrow--aligned'] : ''}`;
+    let arrowCls = `${styles.compass__arrow} ${styles.animatecolor}
+    ${aligned ? styles['compass__arrow--aligned'] : ''}`;
 
     return (
       <div className={styles.compass}>
@@ -85,7 +83,7 @@ export class Compass extends Component {
           <div className={styles.compass__labels}>
             <span>{messageShown}</span>
             <span>
-              {direction.toFixed(2)}
+              {dir.toFixed(2)}
               <sup>o</sup>
             </span>
           </div>

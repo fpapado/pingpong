@@ -8,8 +8,10 @@
  * Licensed under the MIT license.
  */
 
-$accent-color: #be4d45;
+$accent-color: #fdca01;
+$accent-color-muted: #c4a228;
 $dark-color: #2a3539;
+$accent-red: #833f3f;
 
 .compass {
   width: 300px;
@@ -55,6 +57,15 @@ $dark-color: #2a3539;
     height: 12px;
     z-index: 10;
     border-radius: 15px 15px 0 0;
+  }
+
+  &--aligned {
+    border-color: $accent-red;
+
+    &:before,
+    &:after {
+      background-color: $accent-red;
+    }
   }
 }
 
@@ -172,16 +183,19 @@ $dark-color: #2a3539;
   height: 71%;
   margin-left: 14.5%;
   margin-top: 14.5%;
-  background-color: #be4d45;
+  background-color: $accent-color;
   border-radius: 0 50% 50% 50%;
   box-sizing: border-box;
   transform: rotate(45deg);
+
+  &--aligned {
+    background-color: $accent-red;
+  }
 }
 
 .compass__labels {
   position: absolute;
   z-index: 1;
-  background-color: $accent-color;
   width: 57.6%;
   height: 57.6%;
   top: 50%;
@@ -189,7 +203,7 @@ $dark-color: #2a3539;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   box-sizing: border-box;
-  box-shadow: inset 0 0 5px 3px rgba(0, 0, 0, 0.05);
+  // box-shadow: inset 0 0 5px 3px rgba(0, 0, 0, 0.05);
   padding-top: 10px;
 
   & > span {
@@ -211,7 +225,7 @@ $dark-color: #2a3539;
       font-size: 20px;
       line-height: 24px;
       font-weight: 100;
-      padding-left: 6px;
+      // padding-left: 6px;
       opacity: 0.9;
       text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.25);
     }
@@ -221,4 +235,10 @@ $dark-color: #2a3539;
     line-height: 12px;
     font-size: 16px;
   }
+}
+
+.animatecolor {
+  -webkit-transition: background-color 500ms linear;
+  -ms-transition: background-color 500ms linear;
+  transition: background-color 500ms linear;
 }

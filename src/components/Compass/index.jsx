@@ -7,18 +7,7 @@ export class Compass extends Component {
   };
 
   static defaultProps = {
-    direction: 0,
-    directionNames: ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-  };
-
-  directionName = dir => {
-    let sections = this.props.directionNames.length,
-      sect = 360 / sections,
-      x = Math.floor((dir + sect / 2) / sect);
-
-    x = x >= sections ? 0 : x;
-
-    return this.props.directionNames[x];
+    direction: 0
   };
 
   normalizeAngle = direction => {
@@ -55,27 +44,48 @@ export class Compass extends Component {
     return rot;
   };
 
-  render(props, state) {
-    let dir = this.normalizeAngle(props.direction);
-    let name = this.directionName(dir);
-    let rotate = `transform: rotate(-${dir}deg)`;
+  render({ direction, message }, state) {
+    // let dir = this.normalizeAngle(props.direction);
+    let aligned =
+      (direction >= 0 && direction <= 10) ||
+      (direction <= 360 && direction >= 350);
+    let messageShown = aligned ? message || '' : '';
+
+    let rotate = `transform: rotate(${direction}deg)`;
+    let highlight = aligned ? 'background-color: #833f3f' : '';
+
+    let windroseCls = `${styles.compass__windrose} ${styles.animatecolor}`;
+    // ${aligned ? styles['compass__windrose--aligned'] : '' }`;
+
+    let arrowCls = `${styles.compass__arrow} ${styles.animatecolor}`;
+    // ${ aligned ? styles['compass__arrow--aligned'] : ''}`;
 
     return (
       <div className={styles.compass}>
-        <div className={styles.compass__windrose} style={rotate}>
-          {[...Array(10)].map((k, i) => (
-            <div className={styles.compass__mark} key={i + 1} />
-          ))}
-          <div className={styles['compass__mark--direction-h']} />
-          <div className={styles['compass__mark--direction-v']} />
+        <div className={windroseCls} style={rotate}>
+          <div className={styles.compass__mark} />
+          <div className={styles.compass__mark} />
+          <div className={styles.compass__mark} />
+          <div className={styles.compass__mark} />
+          <div className={styles.compass__mark} />
+          <div className={styles.compass__mark} />
+          <div className={styles.compass__mark} />
+          <div className={styles.compass__mark} />
+          <div className={styles.compass__mark} />
+          <div className={styles.compass__mark} />
+          <div className={styles.compass__mark} />
         </div>
 
-        <div className={styles['compass__arrow-container']}>
-          <div className={styles.compass__arrow} />
+        <div
+          className={`${styles['compass__arrow-container']} ${
+            styles.animatecolor
+          }`}
+        >
+          <div className={arrowCls} />
           <div className={styles.compass__labels}>
-            <span>{name}</span>
+            <span>{messageShown}</span>
             <span>
-              {dir.toFixed(2)}
+              {direction.toFixed(2)}
               <sup>o</sup>
             </span>
           </div>

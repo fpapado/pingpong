@@ -2,6 +2,8 @@ import xs, { MemoryStream } from 'xstream';
 import throttle from 'xstream/extra/throttle';
 import { position$ } from './position';
 import { deviceOrientation$ } from './deviceorientation';
+import bearing from '@turf/bearing';
+import distance from '@turf/distance';
 import { Either } from '@typed/either';
 
 // if we have shown the heading unavailable warning yet
@@ -60,8 +62,7 @@ function onHeadingChange(event: DeviceOrientationEvent): number {
         }
       }
 
-      // HACK: Necessary on my device...
-      if (currentOrientation[1] === 'primary') {
+      if (currentOrientation[1] === 'secondary') {
         adjustment -= 180;
       }
     }
@@ -125,23 +126,58 @@ export type HeadingResult = Either<HeadingSuccess, HeadingError>;
 export type HeadingSuccess = number | 'NOT_MOVING';
 export type HeadingError = 'UNAVAILABLE';
 
-export const orientation$: MemoryStream<HeadingResult> = position$
-  .debug()
-  .map(position => {
-    let { coords } = position;
-    if (coords.heading === null) {
-      return Either.of('UNAVAILABLE' as 'UNAVAILABLE');
+export const headingFromPosition$: MemoryStream<
+  HeadingResult
+> = position$.debug().map(position => {
+  let { coords } = position;
+  if (coords.heading === null) {
+    return Either.of('UNAVAILABLE' as 'UNAVAILABLE');
+  } else {
+    let res: number | 'NOT_MOVING';
+    if (isNaN(coords.heading)) {
+      return Either.left('NOT_MOVING' as 'NOT_MOVING');
     } else {
-      let res: number | 'NOT_MOVING';
-      if (isNaN(coords.heading)) {
-        return Either.left('NOT_MOVING' as 'NOT_MOVING');
-      } else {
-        return Either.left(coords.heading);
-      }
+      return Either.left(coords.heading);
     }
-  });
+  }
+});
 
-export const heading$ = deviceOrientation$
+export const headingFromOrientation$ = deviceOrientation$
   .compose(throttle(100))
   .debug()
   .map(onHeadingChange);
+
+type LatLng = [number, number];
+
+export type AimResult = Either<number, 'ALPHA_NOT_AVAILABLE'>;
+
+const aimToTarget = (
+  target: LatLng,
+  position: Position,
+  orientation: DeviceOrientationEvent
+): AimResult => {
+  let distanceToTarget = distance(
+    [position.coords.latitude, position.coords.longitude],
+    target,
+    { units: 'kilometers' }
+  );
+
+  let bearingToTarget = bearing(
+    [position.coords.latitude, position.coords.longitude],
+    target
+  );
+
+  if (!orientation.alpha) {
+    return Either.of('ALPHA_NOT_AVAILABLE' as 'ALPHA_NOT_AVAILABLE');
+  }
+  let aim = bearingToTarget + orientation.alpha;
+
+  return Either.left(aim);
+};
+
+export const makeCustomAim$ = (target: LatLng) =>
+  xs
+    .combine(position$, deviceOrientation$.compose(throttle(100)))
+    .map(([position, orientation]) =>
+      aimToTarget(target, position, orientation)
+    );

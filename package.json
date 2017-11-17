@@ -33,6 +33,9 @@
     "typescript": "^2.6.1"
   },
   "dependencies": {
+    "@turf/bearing": "^5.0.4",
+    "@turf/distance": "^5.0.4",
+    "@types/geojson": "^1.0.6",
     "preact": "^8.2.1",
     "preact-compat": "^3.17.0",
     "preact-router": "^2.5.5",

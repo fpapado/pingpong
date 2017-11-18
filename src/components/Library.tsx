@@ -24,9 +24,10 @@ export const AlertBox: FunctionalComponent<AlertBoxProps> = props => {
     error: { style: 'dark-red bg-washed-red b--red', label: 'Error' }
   };
 
+  // 0 2px 5px 0 rgba(0,0,0,0.27), 0 1px 1px 0 rgba(0,0,0,0.15)
   if (props) {
     return (
-      <div class={`mt3 pa3 bt bb ${alertDef[props.type].style}`} role="alert">
+      <div class={`mt3 pa3 ba bw1 ${alertDef[props.type].style}`} role="alert">
         <Paragraph classExtras="b">{alertDef[props.type].label}</Paragraph>
         <Paragraph>{props.children}</Paragraph>
       </div>

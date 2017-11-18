@@ -18,7 +18,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <div id="app">
+      <div id="app" class="h-100 bg-site-blue min-vh-100">
         <Container>
           <Header />
           <Router onChange={this.handleRoute}>

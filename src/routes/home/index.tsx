@@ -44,7 +44,7 @@ const PORTO: [number, number] = [41.1579, -8.6291];
 const state$: MemoryStream<HomeState> = makeCustomAim$(PORTO)
   .debug()
   .map(result => stateFromAim(result))
-  .startWith({ state: 'NORMAL', heading: 0 });
+  .startWith({ state: 'NORMAL', heading: 20 });
 
 // const state$: Stream<HomeState> = xs
 //   .periodic(100)
@@ -119,21 +119,19 @@ export default class Home extends Component<HomeProps, HomeState> {
     return (
       <div class="pa3 mw7-ns center sans-serif">
         {state.state === 'NORMAL' && (
-          <div>
+          <div class="overflow-hidden">
             <Compass direction={state.heading} message="Hello!" />
             {state.infoText && (
-              <div class="mt4 pa3 mw6-ns center bg-light-gray">
-                <div class="measure center">
-                  <AlertBox type="info">{state.infoText}</AlertBox>
-                </div>
+              <div class="mt4 measure center">
+                <AlertBox type="info">{state.infoText}</AlertBox>
               </div>
             )}
           </div>
         )}
         {state.state === 'ERROR' && (
-          <div>
+          <div class="overflow-hidden">
             <Compass direction={0} />
-            <div class="measure center">
+            <div class="mt4 measure center">
               <AlertBox type="error">{state.errorText}</AlertBox>
             </div>
           </div>

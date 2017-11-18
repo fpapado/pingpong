@@ -30,7 +30,7 @@ $accent-red: #ff4136;
   background-color: $dark-color;
   border: 12px solid $accent-color;
   position: relative;
-  box-shadow: inset 0 0 5px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 0 5px 3px rgba(0, 0, 0, 0.05), 0 2px 5px 0 rgba(0,0,0,0.27), 0 1px 1px 0 rgba(0,0,0,0.15);
   transition: transform 0.3s ease;
 
   &:before,
@@ -207,7 +207,7 @@ $accent-red: #ff4136;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   box-sizing: border-box;
-  // box-shadow: inset 0 0 5px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 0 5px 3px rgba(0, 0, 0, 0.05);
   padding-top: 10px;
 
   & > span {

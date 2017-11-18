@@ -58,6 +58,7 @@ export class Compass extends Component {
     let arrowCls = `${styles.compass__arrow} ${styles.animatecolor}
     ${aligned ? styles['compass__arrow--aligned'] : ''}`;
 
+    // TODO: Array.map
     return (
       <div className={styles.compass}>
         <div className={windroseCls} style={rotate}>

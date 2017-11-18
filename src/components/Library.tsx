@@ -40,3 +40,17 @@ export const AlertBox: FunctionalComponent<AlertBoxProps> = props => {
 export const Paragraph = (props: ViewProps) => {
   return <p class={`mv0 lh-copy ${props.classExtras}`}>{props.children}</p>;
 };
+
+export const Button = ({ children, onClick, pressed }: any) => {
+  let baseCls =
+    'ph4 pv2 f5 b lh-copy tc bg-white dark-gray ba bw1 b--dark-gray';
+  let clickableCls = 'hover-bg-white pointer btn-shadow';
+  let pressedCls = 'btn-pressed';
+  let cls = `${baseCls} ${pressed ? pressedCls : clickableCls}`;
+
+  return (
+    <button onClick={onClick} class={cls}>
+      {children}
+    </button>
+  );
+};

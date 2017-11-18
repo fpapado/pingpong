@@ -16,7 +16,7 @@ export default function(config, env, helpers) {
   } else {
     configWithAlias = preactCliConfigAlias(config, 'config/dev.js');
   }
-  return preactCliTypeScript(configWithAlias);
+  return preactCliTypeScript(preactCliPreactCompatConfig(configWithAlias));
 }
 
 const preactCliConfigAlias = (config, configPath) => {
@@ -26,6 +26,16 @@ const preactCliConfigAlias = (config, configPath) => {
 
   // Add the config file to the aliases
   config.resolve.alias['config'] = path.join(__dirname, configPath);
+
+  return config;
+};
+
+const preactCliPreactCompatConfig = config => {
+  // Add the config file to the aliases
+  config.resolve.alias['react'] = 'preact-compat';
+  config.resolve.alias['react-dom'] = 'preact-compat';
+  config.resolve.alias['create-react-class'] =
+    'preact-compat/lib/create-react-class';
 
   return config;
 };

@@ -1,5 +1,4 @@
-import { AlertBox } from '../../components/Library';
-import xs, { Stream, Listener } from 'xstream';
+import xs, { MemoryStream, Stream, Listener } from 'xstream';
 import throttle from 'xstream/extra/throttle';
 import { h, Component } from 'preact';
 import {
@@ -9,9 +8,10 @@ import {
   AimResult,
   makeCustomAim$
 } from '../../services/orientation';
+import { AlertBox } from '../../components/Library';
 import { Compass } from '../../components/Compass';
 import { unpack } from '@typed/either';
-import { MemoryStream } from 'xstream';
+import { config } from 'config';
 
 interface HomeProps {}
 interface NormalState {
@@ -40,13 +40,13 @@ type HomeState = NormalState | ErrorState;
 //   })
 //   .startWith({ state: 'NORMAL', heading: 0 });
 
-const PORTO: [number, number] = [41.1579, -8.6291];
-const state$: MemoryStream<HomeState> = makeCustomAim$(PORTO)
+const STATIC_DEST: [number, number] = config.STATIC_DEST;
+const state$: MemoryStream<HomeState> = makeCustomAim$(STATIC_DEST)
   .debug()
   .map(result => stateFromAim(result))
   .startWith({ state: 'NORMAL', heading: 20 });
 
-// const state$: Stream<HomeState> = xs
+// const state$: MemoryStream<HomeState> = xs
 //   .periodic(100)
 //   .compose(throttle(16))
 //   .map(value => ({ state: 'NORMAL' as 'NORMAL', heading: value }));

@@ -62,9 +62,16 @@ export class Compass extends Component {
     return (
       <div className={styles.compass}>
         <div className={windroseCls} style={rotate}>
-          {Array(10)
-            .fill(10)
-            .map((value, index) => <div className={styles.compass__mark} key={toString(index)} />)}
+          <div className={styles.compass__mark} key={1} />
+          <div className={styles.compass__mark} key={2} />
+          <div className={styles.compass__mark} key={3} />
+          <div className={styles.compass__mark} key={4} />
+          <div className={styles.compass__mark} key={5} />
+          <div className={styles.compass__mark} key={6} />
+          <div className={styles.compass__mark} key={7} />
+          <div className={styles.compass__mark} key={8} />
+          <div className={styles.compass__mark} key={8} />
+          <div className={styles.compass__mark} key={10} />
         </div>
 
         <div className={`${styles['compass__arrow-container']} ${styles.animatecolor}`}>

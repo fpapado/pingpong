@@ -70,7 +70,7 @@ export class Compass extends Component {
           <div className={styles.compass__mark} key={6} />
           <div className={styles.compass__mark} key={7} />
           <div className={styles.compass__mark} key={8} />
-          <div className={styles.compass__mark} key={8} />
+          <div className={styles.compass__mark} key={9} />
           <div className={styles.compass__mark} key={10} />
         </div>
 

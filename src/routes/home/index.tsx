@@ -27,21 +27,25 @@ interface ErrorState {
 interface ButtonState {
   key: string;
   pressed: boolean;
+  targetPosition: LatLng;
 }
 
 const STATIC_DEST: [number, number] = config.STATIC_DEST;
-const targetPosition$: MemoryStream<LatLng> = xs.of(STATIC_DEST).remember();
 
 const initButtons = [
   {
     key: 'Helsinki',
-    pressed: false
+    pressed: false,
+    targetPosition: [60.192, 24.9458] as LatLng
   },
   {
     key: 'Porto',
-    pressed: true
+    pressed: true,
+    targetPosition: STATIC_DEST
   }
 ];
+
+const targetPosition$: MemoryStream<LatLng> = xs.of(STATIC_DEST).remember();
 
 const state$: MemoryStream<HomeState> = makeCustomAim$(targetPosition$)
   .debug()
@@ -62,6 +66,11 @@ const stateFromAim = (aimResult: AimResult): HomeState => {
     }),
     aimResult
   );
+};
+
+const setTargetPosition = ({ key, targetPosition }) => {
+  console.log(key, targetPosition);
+  targetPosition$.shamefullySendNext(targetPosition);
 };
 
 export default class Home extends Component<HomeProps, HomeState> {
@@ -91,7 +100,7 @@ export default class Home extends Component<HomeProps, HomeState> {
     return (
       <div class="pa3 mw7-ns center sans-serif">
         {state.state === 'NORMAL' && (
-          <div class="overflow-hidden">
+          <div class="">
             <Compass direction={state.heading} message="Hello!" />
             {state.infoText && (
               <div class="mt4 measure center">
@@ -101,7 +110,9 @@ export default class Home extends Component<HomeProps, HomeState> {
             <Flex mt={3} align="center" justify="center">
               {state.buttons.map(button => (
                 <Box mr={2} key={button.key} sizing="border-box">
-                  <Button pressed={button.pressed}>{button.key}</Button>
+                  <Button pressed={button.pressed} onClick={ev => setTargetPosition(button)}>
+                    {button.key}
+                  </Button>
                 </Box>
               ))}
             </Flex>

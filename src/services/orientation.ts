@@ -1,4 +1,4 @@
-import xs, { MemoryStream } from 'xstream';
+import xs, { Stream } from 'xstream';
 import throttle from 'xstream/extra/throttle';
 import { position$ } from './position';
 import { absoluteOrientation$ } from './deviceorientation';
@@ -6,7 +6,7 @@ import bearing from '@turf/bearing';
 import distance from '@turf/distance';
 import { Either, unpack } from '@typed/either';
 
-type LatLng = [number, number];
+export type LatLng = [number, number];
 
 const getCustomBearing = (from: LatLng, to: LatLng) => {
   let bearingToTarget = bearing(from, to);
@@ -21,14 +21,13 @@ const aimToTarget = (position: Position, target: LatLng, absOrientation: number)
 };
 
 export type AimResult = Either<number, 'CUSTOM_AIM_UNAVAILABLE'>;
-export const makeCustomAim$ = (target: LatLng): MemoryStream<AimResult> =>
+export const makeCustomAim$ = (target$: Stream<LatLng>): Stream<AimResult> =>
   xs
-    .combine(position$, absoluteOrientation$.compose(throttle(16)))
-    .map(([position, orientationResult]) =>
+    .combine(position$, target$, absoluteOrientation$)
+    .map(([position, target, orientationResult]) =>
       unpack(
         (absOrientation: number) => Either.left(aimToTarget(position, target, absOrientation)),
         err => Either.of('CUSTOM_AIM_UNAVAILABLE' as 'CUSTOM_AIM_UNAVAILABLE'),
         orientationResult
       )
-    )
-    .remember();
+    );

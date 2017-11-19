@@ -1,4 +1,4 @@
-import xs, { MemoryStream, Listener, Producer } from 'xstream';
+import xs, { Stream, Listener, Producer } from 'xstream';
 import { Either } from '@typed/either';
 
 const orientationProducer: Producer<DeviceOrientationEvent> = {
@@ -20,10 +20,10 @@ const orientationProducer: Producer<DeviceOrientationEvent> = {
   stop: function() {}
 };
 
-export const deviceOrientation$ = xs.createWithMemory(orientationProducer);
+export const deviceOrientation$ = xs.create(orientationProducer);
 
 export type AbsoluteOrientationResult = Either<number, 'ABSOLUTE_ORIENTATION_UNAVAILABLE'>;
-export const absoluteOrientation$: MemoryStream<AbsoluteOrientationResult> = deviceOrientation$.map(
+export const absoluteOrientation$: Stream<AbsoluteOrientationResult> = deviceOrientation$.map(
   ev => {
     if (ev.absolute) {
       if (ev.alpha === null) {

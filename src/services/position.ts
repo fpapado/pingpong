@@ -11,7 +11,7 @@ const positionProducer: PositionProducer = {
       err => listener.error(err),
       {
         enableHighAccuracy: false,
-        maximumAge: 1000
+        maximumAge: 30000
       }
     );
   },

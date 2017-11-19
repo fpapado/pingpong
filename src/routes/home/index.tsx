@@ -1,7 +1,7 @@
-import xs, { MemoryStream, Stream, Listener } from 'xstream';
+import xs, { Listener, MemoryStream, Producer, Stream } from 'xstream';
 import throttle from 'xstream/extra/throttle';
 import { h, Component } from 'preact';
-import { AimResult, makeCustomAim$ } from '../../services/orientation';
+import { AimResult, makeCustomAim$, LatLng } from '../../services/orientation';
 import { AlertBox, Button } from '../../components/Library';
 import { Flex, Box } from 'grid-styled';
 import { Compass } from '../../components/Compass';
@@ -9,28 +9,52 @@ import { unpack } from '@typed/either';
 import { config } from 'config';
 
 interface HomeProps {}
+
+type HomeState = NormalState | ErrorState;
+
 interface NormalState {
   state: 'NORMAL';
   heading: number;
+  buttons: Array<ButtonState>;
   infoText?: string;
 }
+
 interface ErrorState {
   state: 'ERROR';
   errorText: string;
 }
-type HomeState = NormalState | ErrorState;
+
+interface ButtonState {
+  key: string;
+  pressed: boolean;
+}
 
 const STATIC_DEST: [number, number] = config.STATIC_DEST;
-const state$: MemoryStream<HomeState> = makeCustomAim$(STATIC_DEST)
+const targetPosition$: MemoryStream<LatLng> = xs.of(STATIC_DEST).remember();
+
+const initButtons = [
+  {
+    key: 'Helsinki',
+    pressed: false
+  },
+  {
+    key: 'Porto',
+    pressed: true
+  }
+];
+
+const state$: MemoryStream<HomeState> = makeCustomAim$(targetPosition$)
   .debug()
   .map(result => stateFromAim(result))
-  .startWith({ state: 'NORMAL', heading: 20 });
+  .startWith({ state: 'NORMAL', heading: 0, buttons: initButtons });
 
+// TODO: functional setState, move into component
 const stateFromAim = (aimResult: AimResult): HomeState => {
   return unpack(
     (value): HomeState => ({
       state: 'NORMAL',
-      heading: value
+      heading: value,
+      buttons: initButtons
     }),
     (err): HomeState => ({
       state: 'ERROR',
@@ -74,6 +98,13 @@ export default class Home extends Component<HomeProps, HomeState> {
                 <AlertBox type="info">{state.infoText}</AlertBox>
               </div>
             )}
+            <Flex mt={3} align="center" justify="center">
+              {state.buttons.map(button => (
+                <Box mr={2} key={button.key} sizing="border-box">
+                  <Button pressed={button.pressed}>{button.key}</Button>
+                </Box>
+              ))}
+            </Flex>
           </div>
         )}
         {state.state === 'ERROR' && (
@@ -84,14 +115,6 @@ export default class Home extends Component<HomeProps, HomeState> {
             </div>
           </div>
         )}
-        <Flex mt={3} align="center" justify="center">
-          <Box mr={2}>
-            <Button>Helsinki</Button>
-          </Box>
-          <Box>
-            <Button pressed={true}>Porto</Button>
-          </Box>
-        </Flex>
       </div>
     );
   }
